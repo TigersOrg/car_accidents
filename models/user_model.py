@@ -1,8 +1,7 @@
-from marshmallow import fields, Schema
 import datetime
-
-from models.init_db import bcrypt, db
+from marshmallow import fields, Schema
 from models.car_model import CarSchema
+from models.init_db import bcrypt, db
 from models.owner_car_model import owner_car
 
 
@@ -21,7 +20,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)  # driver, worker
     created = db.Column(db.DateTime, nullable=False)
     updated = db.Column(db.DateTime, nullable=True)
-    cars = db.relationship('Car', secondary=owner_car, back_populates='users')
+    cars = db.relationship('Car', secondary=owner_car, lazy='subquery', backref=db.backref('users', lazy=True))
 
     def __init__(self, data):
         """
