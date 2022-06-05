@@ -1,8 +1,7 @@
-from marshmallow import fields, Schema
 import datetime
 
+from marshmallow import fields, Schema
 from models.init_db import db
-from models.owner_car_model import owner_car
 
 
 class Car(db.Model):
@@ -14,9 +13,6 @@ class Car(db.Model):
     car_num = db.Column(db.String(20), nullable=False)
     created = db.Column(db.DateTime, nullable=False)
     updated = db.Column(db.DateTime, nullable=True)
-    # owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # a child table
-    # users = db.relationship('User', secondary=owner_car, backref='_cars')
-    users = db.relationship('User', secondary=owner_car, back_populates='cars')
 
     def __init__(self, data):
         """
@@ -28,7 +24,6 @@ class Car(db.Model):
         self.car_num = data.get('car_num')
         self.created = datetime.datetime.utcnow()
         self.updated = datetime.datetime.utcnow()
-        self.owner_id = data.get('owner_id')
 
     def save(self):
         db.session.add(self)
@@ -70,4 +65,3 @@ class CarSchema(Schema):
     car_num = fields.Str(required=True)
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
-    owner_id = fields.Int(required=True)
