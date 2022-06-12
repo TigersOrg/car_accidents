@@ -92,7 +92,7 @@ def delete(user_id):
 
     return jsonify({'message': 'deleted'}, 204)  # todo: custom_response() doesn't work
 
-
+# test user login
 @user_api.route('/login', methods=['POST'])
 def login():
     """

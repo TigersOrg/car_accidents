@@ -17,7 +17,7 @@ class User(db.Model):
     car_num = db.Column(db.String(20))
     country = db.Column(db.String(128), nullable=False)
     city = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # driver, worker
+    a_role = db.Column(db.String(20), nullable=False)  # driver, worker
     created = db.Column(db.DateTime, nullable=False)
     updated = db.Column(db.DateTime, nullable=True)
     cars = db.relationship('Car', secondary=owner_car, lazy='subquery', backref=db.backref('users', lazy=True))
@@ -35,7 +35,7 @@ class User(db.Model):
         self.car_num = data.get('car_num')
         self.country = data.get('country')
         self.city = data.get('city')
-        self.role = data.get('role')
+        self.a_role = data.get('a_role')
         self.created = datetime.datetime.utcnow()
         self.updated = datetime.datetime.utcnow()
 
@@ -92,7 +92,7 @@ class UserSchema(Schema):
     car_num = fields.Str(required=True)
     country = fields.Str(required=True)
     city = fields.Str(required=True)
-    role = fields.Str(required=True)
+    a_role = fields.Str(required=True)
     created = fields.DateTime(dump_only=True)
     updated = fields.DateTime(dump_only=True)
     cars = fields.Nested(CarSchema, many=True)
