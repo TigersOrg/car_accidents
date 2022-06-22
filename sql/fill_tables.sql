@@ -29,7 +29,7 @@ concat('Model ', id),
 concat('AE567', id, 'KN'),
 TO_TIMESTAMP(created_date, 'YYYY-MM-DD HH24:MI:SS'),
 TO_TIMESTAMP(updated_date, 'YYYY-MM-DD HH24:MI:SS')
-FROM generate_series(2, current_setting('my.number_of_users')::int) as id,
+FROM generate_series(2, current_setting('my.number_of_cars')::int) as id,
 current_setting('my.created_date') as created_date,
 current_setting('my.updated_date') as updated_date;
 
@@ -38,7 +38,6 @@ INSERT INTO owner_car (user_id, car_id)
 VALUES
 (2, 2),
 (2, 3),
-(3, 6),
+(3, 3),
 (4, 4),
-(4, 5),
-(5, 7);
+(4, 4);

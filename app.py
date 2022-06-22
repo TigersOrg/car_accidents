@@ -6,11 +6,12 @@ import redis
 from flask import Flask, jsonify, request
 
 from config import app_config
+# from config import Configs
 from models.init_db import bcrypt, db
-from models.car_model import Car, CarSchema
+from models.car_model import CarSchema
 from models.user_model import User, UserSchema
-from routes.car_routes import car_api as car_blueprint
-from routes.user_routes import user_api as user_blueprint
+from routes.car_routes import Cars
+from routes.user_routes import Users, OwnerCar
 from utils.custom_response import custom_response
 
 
@@ -22,10 +23,27 @@ env_name = os.getenv('FLASK_ENV')
 app = Flask(__name__)
 
 app.config.from_object(app_config[env_name])
-app.register_blueprint(user_blueprint, url_prefix='/api/v1/users')
-app.register_blueprint(car_blueprint, url_prefix='/api/v1/cars')
+# app.config.from_object(Configs)
 
-r = redis.Redis(host='localhost', port=6379)
+# add rules for user view
+user_view = Users.as_view('users')
+app.add_url_rule('/api/v1/users/', defaults={'user_id': None}, view_func=user_view, methods=['GET'])
+app.add_url_rule('/api/v1/users/', view_func=user_view, methods=['POST'])
+app.add_url_rule('/api/v1/users/<int:user_id>', view_func=user_view, methods=['GET', 'PATCH', 'DELETE'])
+
+# add rules for owner_car view
+owner_car_view = OwnerCar.as_view('owner_car')
+app.add_url_rule('/api/v1/owner_car/', view_func=owner_car_view, methods=['GET'])
+app.add_url_rule('/api/v1/owner_car/<int:user_id>', view_func=owner_car_view, methods=['POST'])
+app.add_url_rule('/api/v1/owner_car/<int:user_id>', view_func=owner_car_view, methods=['PATCH'])
+
+# add rules for cars view
+car_view = Cars.as_view('cars')
+app.add_url_rule('/api/v1/cars/', defaults={'car_id': None}, view_func=car_view, methods=['GET'])
+app.add_url_rule('/api/v1/cars/', view_func=car_view, methods=['POST'])
+app.add_url_rule('/api/v1/cars/<int:car_id>', view_func=car_view, methods=['GET', 'PATCH', 'DELETE'])
+
+r = redis.Redis(host='redis', port=7777)
 
 bcrypt.init_app(app)
 db.init_app(app)
@@ -86,7 +104,7 @@ def login():
                 "token": r.get(f"{uuid}:access"),
                 "refresh": r.get(f"{uuid}:refresh")
             }
-        )
+         )
 
     if email is None:
         return f"response: user doesn't exist"
@@ -103,33 +121,6 @@ def login():
             return {"Authorization": access, "RefreshAuth": refresh }, 200, jwtheaders
         else:
             return {"Error": "Incorrect password"}, 401
-
-
-# # add some sample data into database
-# @app.route('/init-sample-data')
-# def init_sample_data():
-#     owner_and_car_list = []
-#     for user_number in range(3):
-#         user = User(
-#             first_name="User " + str(user_number),
-#             last_name="LastName " + str(user_number),
-#             phone="777-87-97" + str(user_number),
-#             email="user-" + str(user_number) + "@email.com",
-#             password='password' + str(user_number),
-#             car_num='AE5678' + str(user_number) + 'KY',
-#             country='Ukraine',
-#             city='Dnipro',
-#             role='worker')
-#
-#         owner_and_car_list.append(user)
-#
-#     for car_number in range(5):
-#         car = Car(mark="Kia", model="Sportage", car_num='AE5678' + str(car_number) + 'KY')
-#         owner_and_car_list.append(car)
-#
-#     db.session.add_all(owner_and_car_list)
-#     db.session.commit()
-#     return "Successfully Initialized"
 
 
 if __name__ == '__main__':

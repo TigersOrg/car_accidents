@@ -26,3 +26,6 @@ app_config = {
     'development': Development,
     'production': Production,
 }
+
+# class Configs(object):
+#     DEBUG = True
