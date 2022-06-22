@@ -4,9 +4,6 @@ import os
 import redis
 
 from flask import Flask, jsonify, request
-
-from config import app_config
-# from config import Configs
 from models.init_db import bcrypt, db
 from models.car_model import CarSchema
 from models.user_model import User, UserSchema
@@ -22,8 +19,7 @@ env_name = os.getenv('FLASK_ENV')
 
 app = Flask(__name__)
 
-app.config.from_object(app_config[env_name])
-# app.config.from_object(Configs)
+app.config.from_object('config.Config')
 
 # add rules for user view
 user_view = Users.as_view('users')

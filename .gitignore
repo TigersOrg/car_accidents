@@ -2,3 +2,4 @@
 __pycache__/
 .postgres-data/
 .temp.py
+.env
