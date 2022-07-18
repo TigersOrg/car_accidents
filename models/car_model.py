@@ -25,34 +25,8 @@ class Car(db.Model):
         self.created = datetime.datetime.utcnow()
         self.updated = datetime.datetime.utcnow()
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, data):
-        for key, item in data.items():
-            setattr(self, key, item)
-        self.updated = datetime.datetime.utcnow()
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    @staticmethod
-    def get_all_cars():
-        return Car.query.all()
-
-    @staticmethod
-    def get_one_car(id):
-        return Car.query.get(id)
-
-    @staticmethod
-    def get_all_cars_for_a_user(id):
-        return Car.query.filter(Car.users.any(id=id)).all()
-
     def __repr__(self):
-        return '<id {}>'.format(self.id)
+        return "Car_number: car_num='%s'" % self.car_num
 
 
 class CarSchema(Schema):

@@ -6,15 +6,17 @@ import redis
 from flask import Flask, jsonify, request
 from models.init_db import bcrypt, db
 from models.car_model import CarSchema
-from models.user_model import User, UserSchema
+from models.user_model import UserSchema
 from routes.car_routes import Cars
-from routes.user_routes import Users, OwnerCar
+from routes.user_routes import Users
+from routes.user_car_routes import UserCar
 from utils.custom_response import custom_response
-
+from domain.user_client import get_user_by_email_from_db
 
 user_schema = UserSchema()
 car_schema = CarSchema()
 
+# todo: load dotenv to use .env
 env_name = os.getenv('FLASK_ENV')
 
 app = Flask(__name__)
@@ -27,11 +29,11 @@ app.add_url_rule('/api/v1/users/', defaults={'user_id': None}, view_func=user_vi
 app.add_url_rule('/api/v1/users/', view_func=user_view, methods=['POST'])
 app.add_url_rule('/api/v1/users/<int:user_id>', view_func=user_view, methods=['GET', 'PATCH', 'DELETE'])
 
-# add rules for owner_car view
-owner_car_view = OwnerCar.as_view('owner_car')
-app.add_url_rule('/api/v1/owner_car/', view_func=owner_car_view, methods=['GET'])
-app.add_url_rule('/api/v1/owner_car/<int:user_id>', view_func=owner_car_view, methods=['POST'])
-app.add_url_rule('/api/v1/owner_car/<int:user_id>', view_func=owner_car_view, methods=['PATCH'])
+# add rules for user_car view
+user_car_view = UserCar.as_view('user_car')
+app.add_url_rule('/api/v1/user_car/', view_func=user_car_view, methods=['GET'])
+app.add_url_rule('/api/v1/user_car/<int:user_id>', view_func=user_car_view, methods=['POST'])
+app.add_url_rule('/api/v1/user_car/<int:user_id>', view_func=user_car_view, methods=['PATCH'])
 
 # add rules for cars view
 car_view = Cars.as_view('cars')
@@ -86,7 +88,7 @@ def login():
     #     data_response = conn.execute(f"SELECT email, password, uuid FROM Users WHERE email = '{email}'")
     #     uemail, upassword, uuid = data_response.first()
 
-    user = User.get_user_by_email(email)
+    user = get_user_by_email_from_db(email)
     uuid = user.id
     if not user:
         return custom_response({'error': 'invalid credentials'}, 400)
