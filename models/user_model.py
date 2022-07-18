@@ -2,7 +2,7 @@ import datetime
 from marshmallow import fields, Schema
 from models.car_model import CarSchema
 from models.init_db import bcrypt, db
-from models.owner_car_model import owner_car
+from models.user_car_model import user_car
 
 
 class User(db.Model):
@@ -20,7 +20,7 @@ class User(db.Model):
     a_role = db.Column(db.String(20), nullable=False)  # driver, worker
     created = db.Column(db.DateTime, nullable=False)
     updated = db.Column(db.DateTime, nullable=True)
-    cars = db.relationship('Car', secondary=owner_car, lazy='subquery', backref=db.backref('users', lazy=True))
+    cars = db.relationship('Car', secondary=user_car, lazy='subquery', backref=db.backref('users', lazy=True))
 
     def __init__(self, data):
         """
@@ -31,7 +31,7 @@ class User(db.Model):
         self.last_name = data.get('last_name')
         self.phone = data.get('phone')
         self.email = data.get('email')
-        self.password = self.__generate_hash(data.get('password'))
+        self.password = self.generate_hash(data.get('password'))
         self.car_num = data.get('car_num')
         self.country = data.get('country')
         self.city = data.get('city')
@@ -39,36 +39,8 @@ class User(db.Model):
         self.created = datetime.datetime.utcnow()
         self.updated = datetime.datetime.utcnow()
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, data):
-        for key, item in data.items():
-            if key == 'password':
-                self.password = self.__generate_hash(item)
-            setattr(self, key, item)
-        self.modified_at = datetime.datetime.utcnow()
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    @staticmethod
-    def get_all_users():
-        return User.query.all()
-
-    @staticmethod
-    def get_one_user(id):
-        return User.query.get(id)
-
-    @staticmethod
-    def get_user_by_email(value):
-        return User.query.filter_by(email=value).first()
-
     # hash user's password before saving it into the db
-    def __generate_hash(self, password):
+    def generate_hash(self, password):
         return bcrypt.generate_password_hash(password, rounds=10).decode("utf-8")
 
     # validate user's password during login
