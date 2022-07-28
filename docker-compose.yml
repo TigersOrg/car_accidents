@@ -1,0 +1,45 @@
+version: '3.9'
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:latest
+        restart: always
+        environment:
+          - POSTGRES_DB=postgres
+          - POSTGRES_USER=admin
+          - POSTGRES_PASSWORD=password
+        ports:
+          - '5432:5432'
+        volumes:
+          - /var/lib/postgresql/data
+          # copy the sql script to create tables
+          - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+          # copy the sql script to fill tables
+          - ./sql/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
+    pgadmin:
+      container_name: pgadmin
+      image: dpage/pgadmin4:latest
+      restart: always
+      environment:
+        - PGADMIN_DEFAULT_EMAIL=admin@gmail.com
+        - PGADMIN_DEFAULT_PASSWORD=password
+      ports:
+        - 5050:80
+    web:
+      container_name: owner_car
+      build: .
+      volumes:
+        - .:/app
+      ports:
+        - '5000:5000'
+      depends_on:
+        - redis
+        - postgres
+    redis:
+      image: redis
+      environment:
+        - REDIS_HOST=redis
+        - REDIS_PORT=7777
+      command: redis-server --loglevel warning --port 7777
+      ports:
+        - '7777:7777'

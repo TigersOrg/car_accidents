@@ -1,83 +1,37 @@
-from flask import request, Blueprint, jsonify
-from models.car_model import Car, CarSchema
+from flask.views import MethodView
 
-from utils.authentication import check_token, generate_token
-from utils.custom_response import custom_response
-
-
-car_api = Blueprint('car_api', __name__)
-car_schema = CarSchema()
+from domain.car_client import create_car, get_one_car, get_cars, update_car, delete_car
+from utils.authentication import check_token
 
 
-# Method POST http://127.0.0.1:5000/api/v1/cars/
-@car_api.route('/', methods=['POST'])
-def create():
+class Cars(MethodView):
     """
-    Create car 'function'
+    The class represents a group of endpoints dealing with cars
     """
-    req_data = request.get_json()
+    decorators = [check_token]
 
-    # todo: check if a car already exists in the db
-    # car_in_db = Car.get_user_by_num(req_data.get('car_num'))
-    # if car_in_db:
-    #     message = {'error': 'Car already exists'}
-    #     return custom_response(message, 400)
+    def post(self):
+        """
+        Create car
+        """
+        return create_car()
 
-    car = Car(req_data)
-    car.save()
+    def get(self, car_id=None):
+        """
+        Get cars
+        """
+        if car_id is None:
+            return get_cars()
+        return get_one_car(car_id)
 
-    ser_data = car_schema.dump(car)
-    return custom_response({'new car': ser_data}, 201)
+    def patch(self, car_id):
+        """
+        Update a car
+        """
+        return update_car(car_id)
 
-
-# Method GET http://127.0.0.1:5000/api/v1/cars/
-@car_api.route('/', methods=['GET'])
-def get_all():
-    """
-    Get all cars
-    """
-    cars = Car.get_all_cars()
-    ser_data = car_schema.dump(cars, many=True)
-    return custom_response(ser_data, 200)
-
-
-# Method GET http://127.0.0.1:5000/api/v1/cars/id
-@car_api.route('/<int:car_id>', methods=['GET'])
-def get_one(car_id):
-    """
-    Get a car
-    """
-    car = Car.get_one_car(car_id)
-    if not car:
-        return custom_response({'error': 'car not found'}, 404)
-    ser_data = car_schema.dump(car)
-    return custom_response(ser_data, 200)
-
-
-# Method PATCH http://127.0.0.1:5000/api/v1/cars/id
-@car_api.route('/<int:car_id>', methods=['PATCH'])
-def update(car_id):
-    """
-    Update a car
-    """
-    req_data = request.get_json()
-    car = Car.get_one_car(car_id)
-    if not car:
-        return custom_response({'error': 'car not found'}, 404)
-    car.update(req_data)
-    ser_data = car_schema.dump(car)
-    return custom_response(ser_data, 200)
-
-
-# Method DELETE http://127.0.0.1:5000/api/v1/cars/id
-@car_api.route('/<int:car_id>', methods=['DELETE'])
-def delete(car_id):
-    """
-    Delete a car
-    """
-    car = Car.get_one_car(car_id)
-    if not car:
-        return custom_response({'error': 'car not found'}, 404)
-    car.delete()
-    # return custom_response({'message': 'deleted'}, 204)
-    return jsonify({'message': 'deleted'}, 204)
+    def delete(self, car_id):
+        """
+        Delete a car
+        """
+        return delete_car(car_id)

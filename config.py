@@ -1,27 +1,16 @@
-import os
+from os import environ, path
+from dotenv import load_dotenv
+
+basedir = path.abspath(path.dirname(__file__))
+load_dotenv(path.join(basedir, '.env'))
 
 
-class Development(object):
-    """
-    Development environment configuration
-    """
-    DEBUG = True
-    TESTING = False
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+class Config:
+    """Set Flask config variables."""
 
+    FLASK_ENV = 'development'
+    SECRET_KEY = environ.get('SECRET_KEY')
 
-class Production(object):
-    """
-    Production environment configurations
-    """
-    DEBUG = False
-    TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-
-
-app_config = {
-    'development': Development,
-    'production': Production,
-}
+    # Database
+    SQLALCHEMY_DATABASE_URI = environ.get('SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
